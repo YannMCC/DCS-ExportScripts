@@ -1253,6 +1253,8 @@ export_ids = {
     PILOT_IFF_M3                   = 10057,
     WSO_APX80A                     = 10058,
     WSO_APX80A_FULL                = 10059,
+    --Barometric Altitude
+    BARO_ALT                       = 10060,
 }
 
 -----------------------------
@@ -1304,7 +1306,7 @@ function ExportScript.ProcessIkarusDCSConfigLowImportance(mainPanelDevice)
     ExportScript.Chaff_Flare(mainPanelDevice)
     ExportScript.IFF(mainPanelDevice)
     ExportScript.NAVCOMP(mainPanelDevice) -- WIP
-
+    ExportScript.ALT_indicator(mainPanelDevice)
     ---------------
     -- Log Dumps --
     ---------------
@@ -1773,6 +1775,15 @@ function ExportScript.TAS_indicator(mainPanelDevice)
     ExportScript.Tools.SendData(export_ids.PILOT_TAS_STRING, string.format("%04.0f", TAS))
 end
 
+function ExportScript.ALT_indicator(mainPanelDevice)
+	local ones = mainPanelDevice:get_argument_value(91) * 100
+	local hundreds = round(mainPanelDevice:get_argument_value(92) * 10)
+	local thousands = round(mainPanelDevice:get_argument_value(93) * 10)
+	local tenthousands = round(mainPanelDevice:get_argument_value(94) * 10)
+    local ALT = tenthousands * 10000 + thousands * 1000 + hundreds *100 + ones
+	ExportScript.Tools.SendData(export_ids.BARO_ALT,string.format("%05.0f", ALT))	
+end
+
 function ExportScript.gun_rounds_indicator(mainPanelDevice)
     local ones = round(mainPanelDevice:get_argument_value(277) * 10)
     local tens = round(mainPanelDevice:get_argument_value(276) * 10)
@@ -1780,6 +1791,8 @@ function ExportScript.gun_rounds_indicator(mainPanelDevice)
     local rounds = hundreds * 100 + tens * 10 + ones
     ExportScript.Tools.SendData(export_ids.PILOT_GUN_ROUNDS, rounds)
 end
+
+
 
 local function get_RWR_button_lights(mainPanelDevice, first_id, second_id)
     -- Associate argument IDs with their text representation, which
